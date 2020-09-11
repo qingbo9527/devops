@@ -12,6 +12,7 @@ class Singlelink_list(object):
     # 表头指向None
     def __init__(self,node = None):
         self.__head = None
+    # 判断链表是否为空
     def is_empty(self):
         return self.__head == None
     def lenght(self):
