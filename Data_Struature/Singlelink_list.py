@@ -1,6 +1,5 @@
 # coding:utf-8
 # @time:2020-09-11
-# coding:utf-8
 # 定义一个节点类
 # 节点对象，包括数据元素elem 和 next
 class Node(object):
@@ -72,6 +71,7 @@ class Singlelink_list(object):
             else:
                 pre = cur
                 cur = cur.next
+    # 插入节点
     def search(self,item):
         cur = self.__head
         while cur != None:
