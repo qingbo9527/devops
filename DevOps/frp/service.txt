@@ -1,0 +1,33 @@
+frp中文文档：https://github.com/fatedier/frp/blob/master/README_zh.md
+
+服务器运行服务创建：vi /lib/systemd/system/frps.service
+
+Frps服务命令：
+[Unit]
+Description=fraps service
+After=network.target syslog.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/root/frp/frps -c /root/frp/frps.ini  #此处安实际情况修改
+
+[Install]
+WantedBy=multi-user.target
+
+Docker HUB页面：https://hub.docker.com/r/chenhw2/frp
+
+客户端运行服务创建：vi /lib/systemd/system/frpc.service
+
+Frpc服务命令：
+[Unit]
+Description=fraps service
+After=network.target syslog.target
+Wants=network.target
+
+[Service]
+Type=simple
+ExecStart=/root/frp/frpc -c /root/frp/frpc.ini  #此处安实际情况修改
+
+[Install]
+WantedBy=multi-user.target
