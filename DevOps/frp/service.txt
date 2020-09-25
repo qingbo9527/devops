@@ -10,7 +10,7 @@ Wants=network.target
 
 [Service]
 Type=simple
-ExecStart=/root/frp/frps -c /root/frp/frps.ini  #此处安实际情况修改
+ExecStart=/root/frp/frps -c /root/frp/frps.ini  #此处按实际情况修改
 
 [Install]
 WantedBy=multi-user.target
@@ -27,7 +27,7 @@ Wants=network.target
 
 [Service]
 Type=simple
-ExecStart=/root/frp/frpc -c /root/frp/frpc.ini  #此处安实际情况修改
+ExecStart=/root/frp/frpc -c /root/frp/frpc.ini  #此处按实际情况修改
 
 [Install]
 WantedBy=multi-user.target
