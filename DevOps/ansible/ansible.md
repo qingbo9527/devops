@@ -160,8 +160,70 @@ Ansible
     ansible test173 -m file -a "path=/testdir/hardfile state=hard src=/testdir/testfile"
     ```
 
-  * ​
+  * ss
+
+* lineinfile模块
+
+  * 我们可以借助lineinfile模块，确保"某一行文本"存在于指定的文件中，或者确保从文件中删除指定的"文本"（即确保指定的文本不存在于文件中），还可以根据正则表达式，替换"某一行文本"。
+
+  * 我们使用/testdir/test文件作为被操作的文件，test文件内容如下
+
+    ```
+    [root@localhost testdir]# cat test
+    Hello ansible,Hiiii
+    lineinfile -
+    Ensure a particular line is in a file,
+    lineinfile -
+    or replace an existing line using a back-referenced regular expression.
+    ```
+
+  * 确保指定的"一行文本"存在于文件中，如果指定的文本本来就存在于文件中，则不做任何操作，如果不存在，默认在文件的末尾插入这行文本，如下命令表示确保"test lineinfile"这行文本存在于/testdir/test文件中。
+
+    ```
+    ansible test167 -m lineinfilea -a 'path=/testdir/test line="test text"'
+    [root@localhost testdir]# cat test
+    Hello ansible,Hiiii
+    lineinfile -
+    Ensure a particular line is in a file,
+    lineinfile -
+    or replace an existing line using a back-referenced regular expression.
+    test text
+    ```
+
+  * 如下命令表示根据正则表达式替换"某一行"，如果不止一行能够匹配正则，那么只有最后一个匹配正则的行才会被替换，被匹配行会被替换成line参数指定的内容，但是如果指定的表达式没有匹配到任何一行，那么line中的内容会被添加到文件的最后一行。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^line" line="test text" '
+    ```
+
+  * 如下命令表示根据正则表达式替换"某一行"，如果不止一行能够匹配正则，那么只有最后一个匹配正则的行才会被替换，被匹配行会被替换成line参数指定的内容，但是如果指定的表达式没有匹配到任何一行，那么则不对文件进行任何操作。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^line" line="test text" backrefs=yes '
+    ```
+
+  * 根据line参数的内容删除行，如果文件中有多行都与line参数的内容相同，那么这些相同的行都会被删除。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test line="lineinfile -" state=absent'
+    ```
+
+  * 根据正则表达式删除对应行，如果有多行都满足正则表达式，那么所有匹配的行都会被删除
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^lineinfile" state=absent'
+    ```
+
+  * 默认情况下，lineinfile模块不支持后向引用（如果对后向引用不是特别了解，可以参考本站中的另一片文章 [Linux正则之分组与后向引用](http://www.zsythink.net/archives/1952)）
+
+    如果将backrefs设置为yes，表示开启支持后向引用，使用如下命令，可以将test示例文件中的"Hello ansible,Hiiii"替换成"Hiiii"，如果不设置backrefs=yes，则不支持后向引用，那么"Hello ansible,Hiiii"将被替换成"\2"
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="(H.{4}).*(H.{4})" line="\2" backrefs=yes'
+    ```
+
+  * pass
+
+* find模块
 
   * ​
-
-    ​

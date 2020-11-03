@@ -39,4 +39,4 @@ ps：每次修改 /etc/gitlab/gitlab.rb 都需要 gitlab-ctl reconfigure
   - gitlab中 用户组 用户 项目
 
   - Gitlab 基本运维 备份 恢复 升级
-  - Gitlab test
+
