@@ -1,0 +1,35 @@
+pipeline {
+	agent any
+	// 任务集合，一个大的任务
+	stages {
+		stage('代码获取') {
+			steps {
+			checkout([$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: 'c975ba77-4a01-4b9e-bc1b-a5b0046357d2', url: 'git@gitlab.qingbo.com:devops/monitor.git']]])
+			}
+		}
+		stage('代码质检') {
+			steps {
+				echo "check code is ok"
+			}
+		}
+		stage('代码构建') {
+			steps {
+				echo "build code is ok"
+			}
+		}
+		stage('代码部署') {
+			steps {
+			sh '/scripts/pipeline_deploy_html.sh'
+			}
+		}		
+	}
+	post {
+        success {
+            sh "echo suc!"
+        }
+        failure {
+            sh "echo fail!"
+        }
+    }
+
+}
