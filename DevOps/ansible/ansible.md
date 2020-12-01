@@ -1,5 +1,7 @@
 Ansible
 
+[TOC]
+
 ### 一、常用模块
 
   * fetch模块
@@ -160,8 +162,261 @@ Ansible
     ansible test173 -m file -a "path=/testdir/hardfile state=hard src=/testdir/testfile"
     ```
 
-  * ​
+  * ss
 
-  * ​
+* lineinfile模块
+
+  * 我们可以借助lineinfile模块，确保"某一行文本"存在于指定的文件中，或者确保从文件中删除指定的"文本"（即确保指定的文本不存在于文件中），还可以根据正则表达式，替换"某一行文本"。
+
+  * 我们使用/testdir/test文件作为被操作的文件，test文件内容如下
+
+    ```
+    [root@localhost testdir]# cat test
+    Hello ansible,Hiiii
+    lineinfile -
+    Ensure a particular line is in a file,
+    lineinfile -
+    or replace an existing line using a back-referenced regular expression.
+    ```
+
+  * 确保指定的"一行文本"存在于文件中，如果指定的文本本来就存在于文件中，则不做任何操作，如果不存在，默认在文件的末尾插入这行文本，如下命令表示确保"test lineinfile"这行文本存在于/testdir/test文件中。
+
+    ```
+    ansible test167 -m lineinfilea -a 'path=/testdir/test line="test text"'
+    [root@localhost testdir]# cat test
+    Hello ansible,Hiiii
+    lineinfile -
+    Ensure a particular line is in a file,
+    lineinfile -
+    or replace an existing line using a back-referenced regular expression.
+    test text
+    ```
+
+  * 如下命令表示根据正则表达式替换"某一行"，如果不止一行能够匹配正则，那么只有最后一个匹配正则的行才会被替换，被匹配行会被替换成line参数指定的内容，但是如果指定的表达式没有匹配到任何一行，那么line中的内容会被添加到文件的最后一行。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^line" line="test text" '
+    ```
+
+  * 如下命令表示根据正则表达式替换"某一行"，如果不止一行能够匹配正则，那么只有最后一个匹配正则的行才会被替换，被匹配行会被替换成line参数指定的内容，但是如果指定的表达式没有匹配到任何一行，那么则不对文件进行任何操作。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^line" line="test text" backrefs=yes '
+    ```
+
+  * 根据line参数的内容删除行，如果文件中有多行都与line参数的内容相同，那么这些相同的行都会被删除。
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test line="lineinfile -" state=absent'
+    ```
+
+  * 根据正则表达式删除对应行，如果有多行都满足正则表达式，那么所有匹配的行都会被删除
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="^lineinfile" state=absent'
+    ```
+
+  * 默认情况下，lineinfile模块不支持后向引用（如果对后向引用不是特别了解，可以参考本站中的另一片文章 [Linux正则之分组与后向引用](http://www.zsythink.net/archives/1952)）
+
+    如果将backrefs设置为yes，表示开启支持后向引用，使用如下命令，可以将test示例文件中的"Hello ansible,Hiiii"替换成"Hiiii"，如果不设置backrefs=yes，则不支持后向引用，那么"Hello ansible,Hiiii"将被替换成"\2"
+
+    ```
+    ansible test167 -m lineinfile -a 'path=/testdir/test regexp="(H.{4}).*(H.{4})" line="\2" backrefs=yes'
+    ```
+
+  * pass
+
+* find模块
+
+  * 在test173主机的/qingbo_code目录中以及其子目录中查找大于10M的文件，不包含隐藏文件，不包含目录或软链接文件等文件类型
+
+    ```
+    # ansible test173 -m find -a "paths=/qingbo_code size=10m recurse=yes"
+    ```
+
+* replace模块
+
+  * 把在test167主机中/testdir/regex文件中的'hello'替换成'haha'
+
+    ```
+    # ansible test167 -m replace -a "path=/testdir/regex regexp="hello" replace=haha"
+    ```
+
+  * 把在test167主机中/testdir/regex文件中的'haha'替换成'hello'，在此之前先备份regex文件
+
+    ```
+    # ansible test167 -m replace -a "path=/testdir/regex regexp="haha" replace=hello backup=yes"
+    ```
+
+* command模块
+
+  * command模块可以帮助我们在远程主机上执行命令
+
+  * 在test167主机上执行ls命令
+
+    ```
+    ansible test167 -m command -a "ls"
+    ```
+
+  * chdir参数表示执行命令之前，会先进入到指定的目录中，所以如下命令表示查看test167主机上/testdir目录中的文件列表
+
+    ```
+    ansible test167 -m command -a "chdir=/testdir ls"
+    ```
+
+  * creates参数表示/testdir/test文件如果存在于远程主机中，则不执行对应命令，如果不存在，才执行"echo test"命令
+
+    ```
+    ansible test167 -m command -a "creates=/testdir/test echo test"
+    ```
+
+  * removes参数表示/testdir/test文件如果不存在于远程主机中，则不执行对应命令，如果存在，才执行"echo test"命令
+
+    ```
+    ansible test167 -m command -a "removes=/testdir/test echo test"
+    ```
+
+* shell模块
+
+  * shell模块可以帮助我们在远程主机上执行命令，与command模块不同的是，shell模块在远程主机中执行命令时，会经过远程主机上的/bin/sh程序处理。
+
+  * shell模块的常用参数：
+
+    * **free_form参数** ：必须参数，指定需要远程执行的命令，但是并没有具体的一个参数名叫free_form。
+    * **chdir参数** :  此参数的作用就是指定一个目录，在执行对应的命令之前，会先进入到chdir参数指定的目录中。
+    * **creates参数** ：使用此参数指定一个文件，当指定的文件存在时，就不执行对应命令。
+    * **removes参数** ：使用此参数指定一个文件，当指定的文件不存在时，就不执行对应命令。
+    * **executable参数**：默认情况下，shell模块会调用远程主机中的/bin/sh去执行对应的命令，通常情况下，远程主机中的默认shell都是bash，如果你想要使用其他类型的shell执行命令，则可以使用此参数指定某种类型的shell去执行对应的命令，指定shell文件时，需要使用绝对路径。
+
+  * 使用shell模块可以在远程服务器上执行命令，它支持管道与重定向等符号，示例如下：
+
+    ```
+    ansible test167 -m shell -a "chdir=/testdir echo test > test"
+    ```
+
+* script模块
+
+  * script模块可以帮助我们在远程主机上执行ansible主机上的脚本，也就是说，脚本一直存在于ansible主机本地，不需要手动拷贝到远程主机后再执行。
+
+  * 如下命令表示ansible主机中的/testdir/atest.sh脚本将在test167主机中执行，执行此脚本之前，会先进入到test167主机中的/opt目录
+
+    ```
+    # ansible test167 -m script -a "chdir=/opt /testdir/atest.sh"
+    test167 | CHANGED => {
+        "changed": true,
+        "rc": 0,
+        "stderr": "Shared connection to 172.16.179.167 closed.\r\n",
+        "stderr_lines": [
+            "Shared connection to 172.16.179.167 closed."
+        ],
+        "stdout": "hello_world\r\n",
+        "stdout_lines": [
+            "hello_world"
+        ]
+    }
+    ```
+
+  * 如下命令表示，如果test167主机中的/opt/testfile文件已经存在，ansible主机中的/testdir/atest.sh脚本将不会在test167主机中执行，反之则执行。
+
+    ```
+    ansible test167 -m script -a "removes=/opt/testfile /testdir/atest.sh"
+    test167 | SKIPPED
+    ```
+
+  * 如下命令表示，如果test167主机中的/opt/testfile文件不存在，ansible主机中的/testdir/atest.sh脚本将不会在test167主机中执行，反之则执行。
+
+    ```
+    ansible test167 -m script -a "creates=/opt/testfile /testdir/atest.sh"
+    test167 | CHANGED => {
+        "changed": true,
+        "rc": 0,
+        "stderr": "Shared connection to 172.16.179.167 closed.\r\n",
+        "stderr_lines": [
+            "Shared connection to 172.16.179.167 closed."
+        ],
+        "stdout": "hello_world\r\n",
+        "stdout_lines": [
+            "hello_world"
+        ]
+    }
+    ```
+
+### 二、系统模块
+
+* cron模块
+
+  * cron模块可以帮助我们管理远程主机中的计划任务，功能相当于crontab命令。
+
+    ```
+    在test167主机上创建计划任务，任务名称为"test crontab"，任务于每天1点1分执行，任务内容为输出test字符
+    # ansible test167 -m cron -a " name='test crontab' minute=1 hour=1 job='echo test'"
+    ```
+
+* service模块
+
+  * service模块可以帮助我们管理远程主机上的服务，比如，启动或停止远程主机中的nginx服务。
+
+    ```
+    将test167中的nginx服务处于启动状态
+    # ansible test167 -m service -a "anme=nginx state=started"
+    将test167中的nginx服务处于停止状态
+    # ansible test167 -m service -a "anme=nginx state=stopped"
+    将test167中的nginx服务被设置为开机自启动项
+    # ansible test167 -m service -a "anme=nginx enabled=yes"
+    ```
+
+* user模块
+
+* group模块
+
+### 三、包管理模块
+
+* yum_repository模块
+
+  * yum_repository模块可以帮助我们管理远程主机上的yum仓库。
+
+    ```
+    1、使用如下命令在test167主机上设置ID为aliEpel 的yum源，仓库配置文件路径为/etc/yum.repos.d/aliEpel.repo
+    # ansible test167 -m yum_repository -a 'name=aliEpel description="alibaba EPEL" baseurl=https://mirrors.aliyun.com/epel/$releasever\Server/$basearch/'
+    ```
+
+* yum模块
+
+  * yum模块可以帮助我们在远程主机上通过yum源管理软件包
+
+    ```
+    1、
+    ```
+
+### 四、playbook
+
+* YAML语法
+
+  * 在编写playbook剧本之前，我们先看两个简单的ad-hoc命令，如下：
+
+    ```
+    ansible test167 -m ping
+    ansible test167 -m file -a "path=/testdir/test state=directory"
+    ```
+
+  * 上述命令表示使用ping模块去ping主机test167，然后再用file模块在test167主机上创建目录，那么，如果把上述命令转换成playbook的表现形式，该如何书写呢？示例如下
+
+    ```
+    ---
+    - hosts: test167
+      remote_user: root
+      tasks:
+      - name: Ping the host
+        ping:
+      - name: make directory test
+        file:
+          path: /testdir/test
+          state: directory
+    ```
 
     ​
+
+
+
+
+
