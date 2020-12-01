@@ -139,8 +139,61 @@
   * 从文本中找出a字母后面跟随3个字符的字符串，但是，我们对后面跟随的3个字符有要求，并不能是任意3个字符，而必须是三个字母，示例如下：
 
     ```
+    [root@localhost testdir]# cat reg1
+    a
+    a6d
+    a89&
+    a7idai8
+    abcd
+    aBdc
+    aBCD
+    a123
+    a1a3
+    a&@%
+    [root@localhost testdir]# grep --color "a[[:alpha:]]\{3\}" reg1
+    abcd
+    aBdc
+    aBCD
+    ```
 
+* [[:lower:]]表示任意小写字母
+
+  * 只有当a后面的3个字符均为小写字母时，才会被匹配到，示例如下：
+
+    ```
+    [root@localhost testdir]# cat reg1
+    a
+    a6d
+    a89&
+    a7idai8
+    abcd
+    aBdc
+    aBCD
+    a123
+    a1a3
+    a&@%
+    [root@localhost testdir]# grep --color "a[[:lower:]]\{3\}" reg1
+    abcd
+    ```
+
+* [[:upper:]]表示任意大写字母
+
+  * 示例如下
+
+    ```
+    [root@localhost testdir]# cat reg1
+    a
+    a6d
+    a89&
+    a7idai8
+    abcd
+    aBdc
+    aBCD
+    a123
+    a1a3
+    a&@%
+    [root@localhost testdir]# grep --color "a[[:upper:]]\{3\}" reg1
+    aBCD
     ```
 
     ​
-
